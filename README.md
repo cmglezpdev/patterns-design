@@ -3,8 +3,10 @@
 
 ## Indice
 
-- Catálogo de patrones de diseño
+- Patrones de diseño
+    - [__Factory (Fábrica):__](#factory) Proporciona una interfaz para poder crear diferentes tipos de objetos.
     - __Abstract Factory (Fábrica Abstracta):__ Proporciona una interfaz para crear familias de objetos relacionados o que dependen entre si, sin especificar clases concretas.
+    - [__Singleton (Único):__](#singleton) Garantiza que una clase solo tenga una instancia y proporciona un punto de acceso global a ella.
     - __Adapter (Adaptador):__ Convierte la interfaz de una clase en otra distinta que es la que espera los clientes. Permite que cooperen clases que de otra manera no podrian por tener interfaces incompatibles.
     - __Bridge (Puente):__ Desacopla una abstracción de su implementación, de manera que ambas puedan variar de forma independiente.
     - __Strategy (Estrategia):__ Define una familia de algoritmos, encapsula cada uno de ellos y los hace intercambiables. Permite que un algoritmo varíe independientemente de los clientes que lo usan.
@@ -13,7 +15,6 @@
     - __Composite (Compuesto):__ Combina objetos en estructuras de arbol para representar jerarquías de parte-todo. Permite que los clientes traten de manera uniforme a los objetos individuales y a los compuestos.
     - __Decorator (Decorador):__ Añade dinámicamente nuevas responsabilidades a un objeto, proporcionando una alternativa flexible a la herencia para extender la funcionalidad.
     - __Observer (Observador):__ Define una dependencia de uno a muchos entre objetos, de forma que cuando un objeto cambie de estado se notifica y se actualizan automáticamente todos los objetos que dependen de él.
-    - __Singleton (Único):__ Garantiza que una clase solo tenga una instancia y proporciona un punto de acceso global a ella.
     - __Strategy (Estrategia):__ Define una familia de algoritmos, encapsula cada uno de ellos y lo hace intercambiables. Permite que un algoritmo varie independientemente de los clientes que lo usan.
 
 
@@ -113,3 +114,28 @@ class Game {
 ```
 
 Asi podemos pasarle por constructor cualquier tipo de generación de enemigos y usarla en nuestro código sin necesidad de modiciar el mismo. Por tanto podemos tener cientos de formas diferentes de generar enemigos y nuestro código sigue siendo el mimsmo.
+
+
+
+
+### Singleton
+
+Este patrón lo que nos permite es poder crear una única instancia de un objeto y que no se pueda de ninguna manera volver a instanciar el objecto, para poder garantizar así que siempre se use la misma instancia en todas las partes en donde esta es utilizada.
+
+Para esto hacemos el constructor de la clase privada, asi sólo la propia clase tiene el control de poder crear una instancia de la misma, evitando que cualquiera fuera de la clase pueda crear una instancia de la misma.
+
+Y ahora para obtener la instancia de la clase crearemos el método `getInstance` que se encargará de crear una única instancia de la clase. Asi cuando deseemos acceder a la instancia, simplemente llamamos a `Singleton.getInstance()` y este nos devuelve siempre la misma.
+
+```ts
+class Singleton {
+    private static instance: Singleton;
+
+    private constructor() {}
+
+    public static getInstance(): Singleton {
+        if( !Singleton.instance ) 
+            Singleton.instante = new Singleton();
+        return Singleton.instance;
+    }
+}
+```
