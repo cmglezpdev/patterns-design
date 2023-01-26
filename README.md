@@ -5,7 +5,7 @@
 
 - Patrones de diseño
     - [__Factory (Fábrica):__](#factory) Proporciona una interfaz para poder crear diferentes tipos de objetos.
-    - __Abstract Factory (Fábrica Abstracta):__ Proporciona una interficie para crear familias de objetos relacionados o que dependen entre si, sin especificar clases concretas.
+    - [__Abstract Factory (Fábrica Abstracta):__](#abstract-factory) Proporciona una interficie para crear familias de objetos relacionados o que dependen entre si, sin especificar clases concretas.
     - [__Singleton (Único):__](#singleton) Garantiza que una clase solo tenga una instancia y proporciona un punto de acceso global a ella.
     - __Adapter (Adaptador):__ Convierte la interfaz de una clase en otra distinta que es la que espera los clientes. Permite que cooperen clases que de otra manera no podrian por tener interfaces incompatibles.
     - __Bridge (Puente):__ Desacopla una abstracción de su implementación, de manera que ambas puedan variar de forma independiente.
@@ -15,9 +15,6 @@
     - __Composite (Compuesto):__ Combina objetos en estructuras de arbol para representar jerarquías de parte-todo. Permite que los clientes traten de manera uniforme a los objetos individuales y a los compuestos.
     - __Decorator (Decorador):__ Añade dinámicamente nuevas responsabilidades a un objeto, proporcionando una alternativa flexible a la herencia para extender la funcionalidad.
     - __Observer (Observador):__ Define una dependencia de uno a muchos entre objetos, de forma que cuando un objeto cambie de estado se notifica y se actualizan automáticamente todos los objetos que dependen de él.
-    - __Strategy (Estrategia):__ Define una familia de algoritmos, encapsula cada uno de ellos y lo hace intercambiables. Permite que un algoritmo varie independientemente de los clientes que lo usan.
-
-
 
 
 ### Factory
@@ -205,3 +202,76 @@ class Singleton {
     }
 }
 ```
+
+
+### Observer
+
+Este patrón aparece cuando tenemos la necesidad de notificarle a un conjunto de objetos los cambios que ocurran en el estado actual de un objecto en concreto. Un ejemplo de esto sería un canal de youtube con los videos subidos al canal, y nosotros queremos notificarle a todos los subscriptores cada vez que se sube un nuevo video. En este caso nuestro canal de youtube sería nuestro objecto a _observar_ (El __observable__), y todos los subscriptores serían los _observadores_ (El __observador__). Esto establece una relación de _uno a muchos_.
+
+```ts
+interface Observer {
+    update();
+}
+
+interface Observable {
+    attach(o: Observer);
+    detach(o: Observer);
+    notify();
+}
+
+
+class YoutubeChanel implements Observable {
+    private channelSubscribers = [];
+    private lastVideoPosted = '';
+
+    // add a new subscriber
+    attach(o: Observer) {
+        this.channelSubscribers.push(o);
+    }
+
+    // delete a subscriber
+    detach(o: Observer) {
+        this.channelSubscribers = this.channelSubscribers.filter(sub => sub !== o);
+    }
+
+    // notify function
+    notify() {
+        for(let subscriber of this.channelSubscribers) {
+            subscriber.update();
+        }
+    }
+
+    // getter to get the last video title
+    getLastVideoTitle() {
+        return this.lastVideoPosted;
+    }
+
+    // add a new video to channel
+    private addNewVideo(title: string) {
+        this.lastVideoPosted = title; // update the last video
+        this.notify(); // notify to all subscribers
+        console.log("New yotube video added to channel")
+    }
+}
+
+class Subscriber implements Observer {
+
+    private readonly observable = null;
+
+    constructor(observable: Observable) {
+        this.observable = observable;
+    }
+
+    // the subscriber know that there is a new video
+    update() {
+        console.log("New video posted.")
+        console.log(this.observable as YoutubeChannel).getLastVideoTitle();
+    }
+}
+```
+
+Tenemos dos interfaces, `Observer` y  `Observable` de donde el objeto a observar y los observadores implementarán dichas interfaces respectivamente. En el ejemplo tenemos como _Observable_ a nuestro `YoutubeChannel` el cual tiene los métodos obtenidos de la interfaz para añadir y eliminar subscriptores y el método `notify` que recorre todos los subscriptores notificándolos de que hay un nuevo video.
+
+Tenemos al _Observer_ `Subscriber` que son los subscriptores, los cuales mediante el método `update` reciben la notificación del canal y realiza las actualizaciones que sean necesarias. 
+
+Como el canal de youtube notifica cada vez que se crea un nuevo video, entonces en el método propio de `YoutubeChannel`: `addNewVideo`, este añade el video y automáticamente llama la función `notify` para notificarle a los subscriptores.
