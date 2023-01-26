@@ -5,7 +5,7 @@
 
 - Patrones de diseño
     - [__Factory (Fábrica):__](#factory) Proporciona una interfaz para poder crear diferentes tipos de objetos.
-    - __Abstract Factory (Fábrica Abstracta):__ Proporciona una interfaz para crear familias de objetos relacionados o que dependen entre si, sin especificar clases concretas.
+    - __Abstract Factory (Fábrica Abstracta):__ Proporciona una interficie para crear familias de objetos relacionados o que dependen entre si, sin especificar clases concretas.
     - [__Singleton (Único):__](#singleton) Garantiza que una clase solo tenga una instancia y proporciona un punto de acceso global a ella.
     - __Adapter (Adaptador):__ Convierte la interfaz de una clase en otra distinta que es la que espera los clientes. Permite que cooperen clases que de otra manera no podrian por tener interfaces incompatibles.
     - __Bridge (Puente):__ Desacopla una abstracción de su implementación, de manera que ambas puedan variar de forma independiente.
@@ -116,7 +116,73 @@ class Game {
 Asi podemos pasarle por constructor cualquier tipo de generación de enemigos y usarla en nuestro código sin necesidad de modiciar el mismo. Por tanto podemos tener cientos de formas diferentes de generar enemigos y nuestro código sigue siendo el mimsmo.
 
 
+### Abstract Factory
 
+Supongamos ahora que queremos crear un juego como __Super Mario__. Tenemos toda la funcionalidad del juego pero queremos que existan varios tipos de gráficos y que sea el usuario el que escoja el que desee, pongamos como ejemplo los gráficos que tiene una nintendo __Gameboy__ y un __NintendoDS__. Si usamos el patrón __Factory__ tendremos clase _Factory_ que crea el elemeto en los distintos gráficos. Si fuéramos por ejemplo a renderizar el _bloque interrogante_ tendríamos un código así:
+
+```ts
+interface Factory<T> {
+    createItem(): T;
+}
+
+interface BloqueInterrogante {
+    spawnItem();
+    render();
+}
+
+class GameboyBloqueInterrogante implements BloqueInterrogante {
+}
+
+class NintendoDSBloqueInterrogante implements BloqueInterrogante {
+}
+
+class GameboyBloqueFactory implements Factory<BloqueInterrogante> {
+    createItem(): BloqueInterrogante {
+        return new GameboyBloqueInterrogante();
+    }
+}
+
+class NintendoDSBloqueFactory implements Factory<BloqueInterrogante> {
+    createItem(): BloqueInterrogante {
+        return new NintendoDSBloqueInterrogante();
+    }
+}
+```
+
+Pero que pasa si queremos renderizar otro elemento? Por ejemplo una moneda. Tendremos que crear otra _Factoy_ y crear las dos implementaciones respectivas a cada tipo de gráfico. Por tanto para __n__ elementos tendremos __n__ _Factories_, una para cada elementos. Esto es muy engorrozo, ademas de que nada nos evita que podamos renderizar dos elementos con gráficos diferentes, y esto no debería pasar.
+
+Aquí es donde entra __Abstract Factory__. Con esta podemos crear familias de objetos relacionados o independientes entre ellos, sin especificar su clase concreta. O sea, en vez de tener __n__ factories, una para cada elemento, solo dos, un para cada tipo de gráficos, y que esta sea quien nos devuelva todos los items en un solo tipo de gráfico, evitando asi que se puedan usar items en distintos gráficos al mismo tiempo.
+
+```ts
+interface AbstractFactory {
+    createCoin(): Coin;
+    createBloqueInterrogante(): BloqueInterrogante;
+}
+
+class GameBoyItemFactory implements AbstractFactory {
+    createCoin() {
+        return new GameBoyCoin();
+    }
+    createBloqueInterrogante() {
+        return new GameBoyBloqueInterrogante();
+    }
+}
+
+class NintendoDSItemFactory implements AbstractFactory {
+    createCoin() {
+        return new NintendoDSCoin();
+    }
+    createBloqueInterrogante() {
+        return new NintendoDSBloqueInterrogante();
+    }
+}
+```
+
+Ahora solo tenemos dos factories, uno para cada gráfico y es esta la que nos devuelve la instancia de cada una de los tipos de items en el gráfico correspondiente.
+
+Hay muchos ejemplo en donde se puedan usar este patrón. Un ejemplo es al crear aplicaciones en donde puedas seleccionar entre __Dark Mode__ o __Light Mode__, aqui podemos crear dos factories, una para cada modo y que estos nos devuelvan los objectos como se verían en ambos modos, y asi cuando se cambia entre un modo u otro, solo tenemos que cambiar la instancia de la _Factory_ de un modo por la instancia del otro, y esto se puede hacer muy facilmente porque estamos usando _polimorfismo_.
+
+Otro ejemplo es en los __frameworks__ de cración de aplicaciones multiplataformas. Por ejemplo, en __React Native__ creamos un único codigo y este al compilarse a __android__ o a __IOS__ adapta la interfaz de los objetos en dependencia de a donde se esté compilando, si a __android__ o a __IOS__. Una implementación de esto puede ser tener dos factories, una para cada plataforma, y que cuando se valla a compliar la aplicación, se le pasa la __Factory__ correspondiente y este devuelve los elementos adaptados ya al tipo de dispositivo.
 
 ### Singleton
 
